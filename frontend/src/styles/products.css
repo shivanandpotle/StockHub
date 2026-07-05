@@ -1,0 +1,18 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-header h1 { font-size: 26px; font-weight: 700; }
+.add-btn { padding: 10px 20px; background: var(--gradient-primary); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.table-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; padding: 14px 18px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.1); }
+.data-table td { padding: 14px 18px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.action-btns { display: flex; gap: 10px; }
+.icon-btn { background: none; border: none; color: var(--text-secondary); padding: 4px; border-radius: 4px; transition: var(--transition-fast); }
+.icon-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+.icon-btn.delete:hover { color: var(--danger); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-card { width: 100%; max-width: 500px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-form { display: flex; flex-direction: column; gap: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
+.cancel-btn { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: var(--radius-sm); font-weight: 500; }
