@@ -1,0 +1,48 @@
+========================================================================
+       STOCKHUB INVENTORY MANAGEMENT SYSTEM - 1-CLICK LAUNCHER
+========================================================================
+
+Hello! This folder contains the 1-Click Starter for the StockHub application.
+You do NOT need any coding knowledge or programming tools to run this app.
+
+------------------------------------------------------------------------
+STEP 1: INSTALL DOCKER DESKTOP (If you don't have it already)
+------------------------------------------------------------------------
+1. Download Docker Desktop for Windows (free) from:
+   https://www.docker.com/products/docker-desktop/
+2. Install it and launch Docker Desktop from your Windows Start Menu.
+3. Keep Docker Desktop running in the background.
+
+------------------------------------------------------------------------
+STEP 2: LAUNCH THE APPLICATION
+------------------------------------------------------------------------
+1. Simply DOUBLE-CLICK the file named:
+      RUN_STOCKHUB_FOR_FRIEND.bat
+
+2. A window will open, automatically download the application components
+   directly from the cloud, and start the servers.
+3. In a few seconds, your web browser will automatically open to:
+      http://localhost
+
+------------------------------------------------------------------------
+DEMO LOGIN CREDENTIALS
+------------------------------------------------------------------------
+You can test the dashboard and report generator using these accounts:
+
+[Business Owner Account]
+Email:    john@stockhub.com
+Password: password123
+
+[Super Admin Account]
+Email:    admin@stockhub.com
+Password: admin123
+
+------------------------------------------------------------------------
+HOW TO STOP THE APPLICATION
+------------------------------------------------------------------------
+When you are finished testing, simply close Docker Desktop, or close the app
+from the Docker Desktop dashboard.
+
+========================================================================
+Enjoy exploring StockHub!
+========================================================================
