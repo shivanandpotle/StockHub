@@ -12,6 +12,7 @@ services:
 
   backend:
     build: ./backend
+    image: shivanandpotle/stockhub-backend:latest
     container_name: stockhub_backend
     restart: always
     ports:
@@ -26,6 +27,7 @@ services:
 
   frontend:
     build: ./frontend
+    image: shivanandpotle/stockhub-frontend:latest
     container_name: stockhub_frontend
     restart: always
     ports:
