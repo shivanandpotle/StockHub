@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const InventoryTransaction = require('../models/InventoryTransaction');
+const { sendLowStockEmail } = require('../utils/sendEmail');
 
 // @desc    Stock In - Add stock to a product
 // @route   POST /api/inventory/stock-in
@@ -109,6 +110,15 @@ const stockOut = async (req, res) => {
       month: now.getMonth() + 1,
       year: now.getFullYear(),
     });
+
+    // Check if stock just dropped to or below minimum threshold
+    if (updatedQuantity <= product.minimumStock && previousQuantity > product.minimumStock) {
+      sendLowStockEmail(req.user.email, {
+        name: product.name,
+        quantity: updatedQuantity,
+        minimumStock: product.minimumStock
+      }).catch(err => console.error('Failed to trigger email asynchronously', err));
+    }
 
     res.status(201).json({
       message: 'Stock removed successfully',
