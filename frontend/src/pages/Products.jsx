@@ -49,11 +49,12 @@ const Products = () => {
       setEditingProduct(product);
       setFormData({
         name: product.name || '',
-        category: typeof product.category === 'object' ? product.category?._id || product.category?.id : product.category || '',
+        category: typeof product.categoryId === 'object' ? product.categoryId?._id || product.categoryId?.id : product.categoryId || '',
         sku: product.sku || '',
-        price: product.price !== undefined ? String(product.price) : '',
+        buyingPrice: product.buyingPrice !== undefined ? String(product.buyingPrice) : '',
+        sellingPrice: product.sellingPrice !== undefined ? String(product.sellingPrice) : '',
         minimumStock: product.minimumStock !== undefined ? String(product.minimumStock) : '10',
-        currentQuantity: product.currentQuantity !== undefined ? String(product.currentQuantity) : '0',
+        currentQuantity: product.quantity !== undefined ? String(product.quantity) : '0',
         description: product.description || ''
       });
     } else {
@@ -62,7 +63,8 @@ const Products = () => {
         name: '',
         category: categories.length > 0 ? (categories[0]._id || categories[0].id) : '',
         sku: `SKU-${Date.now().toString().slice(-6)}`,
-        price: '',
+        buyingPrice: '',
+        sellingPrice: '',
         minimumStock: '10',
         currentQuantity: '0',
         description: ''
@@ -88,11 +90,12 @@ const Products = () => {
     try {
       const payload = {
         name: formData.name,
-        category: formData.category || (categories[0]?._id || categories[0]?.id || 'General'),
+        categoryId: formData.category || (categories[0]?._id || categories[0]?.id),
         sku: formData.sku,
-        price: Number(formData.price),
+        buyingPrice: Number(formData.buyingPrice),
+        sellingPrice: Number(formData.sellingPrice),
         minimumStock: Number(formData.minimumStock),
-        currentQuantity: Number(formData.currentQuantity),
+        quantity: Number(formData.currentQuantity),
         description: formData.description
       };
 
@@ -191,13 +194,13 @@ const Products = () => {
                     <td style={{ color: 'var(--text-secondary)', fontFamily: 'monospace', fontSize: '13px' }}>{product.sku || 'N/A'}</td>
                     <td>{catName}</td>
                     <td style={{ fontWeight: '600', color: 'var(--success)' }}>
-                      ${Number(product.price || 0).toFixed(2)}
+                      ${Number(product.sellingPrice || 0).toFixed(2)}
                     </td>
                     <td style={{ fontWeight: '700' }}>
                       <span style={{
-                        color: product.currentQuantity <= product.minimumStock ? 'var(--warning)' : 'var(--text-primary)'
+                        color: product.quantity <= product.minimumStock ? 'var(--warning)' : 'var(--text-primary)'
                       }}>
-                        {product.currentQuantity !== undefined ? product.currentQuantity : 0}
+                        {product.quantity !== undefined ? product.quantity : 0}
                       </span>
                     </td>
                     <td style={{ color: 'var(--text-secondary)' }}>{product.minimumStock !== undefined ? product.minimumStock : 10}</td>
@@ -278,23 +281,39 @@ const Products = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div className="form-group">
-                  <label htmlFor="price">Price ($) *</label>
+                  <label htmlFor="buyingPrice">Buying Price ($) *</label>
                   <input
                     type="number"
                     step="0.01"
-                    id="price"
-                    name="price"
-                    value={formData.price}
+                    id="buyingPrice"
+                    name="buyingPrice"
+                    value={formData.buyingPrice}
                     onChange={handleChange}
-                    placeholder="99.99"
+                    placeholder="50.00"
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="currentQuantity">Current Qty *</label>
+                  <label htmlFor="sellingPrice">Selling Price ($) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="sellingPrice"
+                    name="sellingPrice"
+                    value={formData.sellingPrice}
+                    onChange={handleChange}
+                    placeholder="99.99"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="form-group">
+                  <label htmlFor="currentQuantity">Initial Qty *</label>
                   <input
                     type="number"
                     id="currentQuantity"
