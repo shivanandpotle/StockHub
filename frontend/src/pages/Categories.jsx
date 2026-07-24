@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../api/axios';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import '../styles/products.css';
@@ -210,7 +211,7 @@ const Categories = () => {
         </div>
       )}
 
-      {modalOpen && (
+      {modalOpen && createPortal(
         <div className="modal-overlay">
           <div className="modal-card fade-in">
             <div className="modal-header">
@@ -258,7 +259,8 @@ const Categories = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
