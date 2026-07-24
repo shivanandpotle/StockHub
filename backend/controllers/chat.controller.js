@@ -39,8 +39,39 @@ const handleChat = async (req, res) => {
       Instructions: Answer the user's questions about their inventory concisely and professionally. If they ask something unrelated to inventory or the business, politely redirect them. Do not format your response with markdown code blocks unless it's code. Keep responses conversational and under 3 paragraphs.
     `;
 
-    // 2. Call Gemini API (if configured)
-    if (process.env.GEMINI_API_KEY) {
+    // 2. Call Grok API (if configured)
+    if (process.env.GROK_API_KEY) {
+      try {
+        const response = await fetch('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.GROK_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'grok-beta',
+            messages: [
+              { role: 'system', content: inventoryContext },
+              { role: 'user', content: message }
+            ]
+          })
+        });
+        
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`Grok API Error: ${response.status} - ${errText}`);
+        }
+        
+        const data = await response.json();
+        const text = data.choices[0].message.content;
+        return res.json({ reply: text });
+      } catch (grokError) {
+        console.error('Grok API Error:', grokError.message);
+        return res.json({ reply: "I am the StockHub AI Assistant! (Note: Grok API encountered an error. Please check your API key)." });
+      }
+    } 
+    // 3. Call Gemini API (if configured as fallback)
+    else if (process.env.GEMINI_API_KEY) {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       
