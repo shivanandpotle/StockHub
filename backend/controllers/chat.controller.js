@@ -39,24 +39,29 @@ const handleChat = async (req, res) => {
       Instructions: Answer the user's questions about their inventory concisely and professionally. If they ask something unrelated to inventory or the business, politely redirect them. Do not format your response with markdown code blocks unless it's code. Keep responses conversational and under 3 paragraphs.
     `;
 
-    // 2. Call Grok API (if configured)
-    if (process.env.GROK_API_KEY) {
+    // 2. Call Groq / xAI API (if configured)
+    const grokKey = process.env.GROK_API_KEY || process.env.GROQ_API_KEY;
+    if (grokKey) {
       try {
-        console.log("Fetching available Grok models...");
-        const modelsRes = await fetch('https://api.x.ai/v1/models', {
-          headers: { 'Authorization': `Bearer ${process.env.GROK_API_KEY}` }
+        const isGroq = grokKey.startsWith('gsk_');
+        const baseUrl = isGroq ? 'https://api.groq.com/openai/v1' : 'https://api.x.ai/v1';
+        const aiName = isGroq ? 'Groq' : 'Grok (xAI)';
+        
+        console.log(`Fetching available ${aiName} models...`);
+        const modelsRes = await fetch(`${baseUrl}/models`, {
+          headers: { 'Authorization': `Bearer ${grokKey}` }
         });
         const modelsData = await modelsRes.json();
         const models = modelsData.data || [];
         
         for (const m of models) {
           try {
-            console.log(`Trying Grok model: ${m.id}`);
-            const response = await fetch('https://api.x.ai/v1/chat/completions', {
+            console.log(`Trying ${aiName} model: ${m.id}`);
+            const response = await fetch(`${baseUrl}/chat/completions`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.GROK_API_KEY}`
+                'Authorization': `Bearer ${grokKey}`
               },
               body: JSON.stringify({
                 model: m.id,
@@ -70,7 +75,7 @@ const handleChat = async (req, res) => {
             if (response.ok) {
               const data = await response.json();
               const text = data.choices[0].message.content;
-              console.log(`Success with Grok model: ${m.id}`);
+              console.log(`Success with ${aiName} model: ${m.id}`);
               return res.json({ reply: text });
             }
           } catch (e) {
@@ -78,12 +83,12 @@ const handleChat = async (req, res) => {
           }
         }
         
-        throw new Error("No available Grok models worked.");
+        throw new Error(`No available ${aiName} models worked.`);
       } catch (grokError) {
-        console.error('Grok API Error:', grokError.message);
-        return res.json({ reply: "I am the StockHub AI Assistant! (Note: Grok API encountered an error. Please check your API key)." });
+        console.error('Groq/xAI API Error:', grokError.message);
+        return res.json({ reply: "I am the StockHub AI Assistant! (Note: API encountered an error. Please check your API key)." });
       }
-    } 
+    }
     // 3. Call Gemini API (if configured as fallback)
     else if (process.env.GEMINI_API_KEY) {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
