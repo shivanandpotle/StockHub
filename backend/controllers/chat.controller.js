@@ -54,29 +54,31 @@ const handleChat = async (req, res) => {
         console.error('Gemini Initial API Error:', geminiError.message);
         
         // If the model was not found, try to dynamically fetch available models
-        if (geminiError.message.includes('404')) {
-          try {
-            console.log("Attempting dynamic model discovery...");
-            const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
-            const modelsData = await modelsRes.json();
-            const models = modelsData.models || [];
-            
-            const validModel = models.find(m => 
-              m.name.includes('gemini') && 
-              m.supportedGenerationMethods && 
-              m.supportedGenerationMethods.includes('generateContent')
-            );
-            
-            if (validModel) {
-              const safeModelName = validModel.name.replace('models/', '');
-              console.log("Dynamically selected model:", safeModelName);
-              const fallbackModel = genAI.getGenerativeModel({ model: safeModelName });
-              const result = await fallbackModel.generateContent(prompt);
-              return res.json({ reply: (await result.response).text() });
+        // If the initial model fails, dynamically test available models until one succeeds
+        try {
+          console.log("Attempting dynamic model discovery due to API error...");
+          const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+          const modelsData = await modelsRes.json();
+          const models = modelsData.models || [];
+          
+          for (const m of models) {
+            if (m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')) {
+              try {
+                const safeModelName = m.name.replace('models/', '');
+                console.log(`Trying fallback model: ${safeModelName}`);
+                const fallbackModel = genAI.getGenerativeModel({ model: safeModelName });
+                const result = await fallbackModel.generateContent(prompt);
+                const replyText = await result.response.text();
+                console.log(`Success with fallback model: ${safeModelName}`);
+                return res.json({ reply: replyText });
+              } catch (e) {
+                // Silently fail and try the next model
+              }
             }
-          } catch (fallbackError) {
-            console.error('Fallback model discovery failed:', fallbackError.message);
           }
+          console.error("All fallback models failed (likely due to 0 quota limits).");
+        } catch (fallbackError) {
+          console.error('Fallback model discovery failed:', fallbackError.message);
         }
         
         // If Gemini completely fails (region block, invalid key, etc), fallback to basic response
