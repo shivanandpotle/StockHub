@@ -73,10 +73,10 @@ const handleChat = async (req, res) => {
             });
             
             if (response.ok) {
-              const data = await response.json();
               const text = data.choices[0].message.content;
+              const cleanText = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
               console.log(`Success with ${aiName} model: ${m.id}`);
-              return res.json({ reply: text });
+              return res.json({ reply: cleanText });
             }
           } catch (e) {
             // Silently ignore and try next
