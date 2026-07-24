@@ -53,7 +53,7 @@ const handleChat = async (req, res) => {
       } catch (geminiError) {
         console.error('Gemini Initial API Error:', geminiError.message);
         
-        // If the model was not found, try to dynamically fetch available models and use the first one
+        // If the model was not found, try to dynamically fetch available models
         if (geminiError.message.includes('404')) {
           try {
             console.log("Attempting dynamic model discovery...");
@@ -61,7 +61,6 @@ const handleChat = async (req, res) => {
             const modelsData = await modelsRes.json();
             const models = modelsData.models || [];
             
-            // Find any gemini model that supports generateContent
             const validModel = models.find(m => 
               m.name.includes('gemini') && 
               m.supportedGenerationMethods && 
@@ -80,28 +79,36 @@ const handleChat = async (req, res) => {
           }
         }
         
-        // If all else fails
-        let errorMessage = "I'm having trouble thinking right now. Please check if my Gemini API key is valid!";
-        if (geminiError.message.includes('API key not valid')) {
-          errorMessage = "Your Gemini API key is invalid. Please generate a new one from Google AI Studio (aistudio.google.com).";
+        // If Gemini completely fails (region block, invalid key, etc), fallback to basic response
+        console.warn("⚠️ Gemini API completely failed. Falling back to basic mock response.");
+        
+        let reply = "I am the StockHub AI Assistant! (Note: Gemini API is currently unavailable in your region or your key is invalid, so this is a basic automated response). \n\n";
+        
+        const lowerMsg = message.toLowerCase();
+        if (lowerMsg.includes('low stock')) {
+          reply += `You currently have ${lowStockItems.length} low stock items.`;
+        } else if (lowerMsg.includes('value') || lowerMsg.includes('worth')) {
+          reply += `Your total inventory value is $${totalValue.toFixed(2)}.`;
+        } else if (lowerMsg.includes('total') || lowerMsg.includes('how many') || lowerMsg.includes('stock')) {
+          reply += `You have a total of ${totalProducts} products in your inventory.`;
         } else {
-          errorMessage = "My Gemini API is encountering a region or permissions error. I couldn't find any available AI models for your API key!";
+          reply += "How can I help you manage your inventory today?";
         }
         
-        return res.json({ reply: errorMessage });
+        return res.json({ reply });
       }
     } else {
       // 3. Fallback Mock Response (if no API key is provided yet)
       console.warn("⚠️ No GEMINI_API_KEY found. Returning mock chatbot response.");
       
-      let reply = "I am the StockHub AI Assistant! (Note: Gemini API Key is missing, so this is a mock response). ";
+      let reply = "I am the StockHub AI Assistant! (Note: Gemini API Key is missing, so this is a mock response). \n\n";
       
       const lowerMsg = message.toLowerCase();
       if (lowerMsg.includes('low stock')) {
         reply += `You currently have ${lowStockItems.length} low stock items.`;
-      } else if (lowerMsg.includes('value')) {
+      } else if (lowerMsg.includes('value') || lowerMsg.includes('worth')) {
         reply += `Your total inventory value is $${totalValue.toFixed(2)}.`;
-      } else if (lowerMsg.includes('total') || lowerMsg.includes('how many')) {
+      } else if (lowerMsg.includes('total') || lowerMsg.includes('how many') || lowerMsg.includes('stock')) {
         reply += `You have a total of ${totalProducts} products in your inventory.`;
       } else {
         reply += "How can I help you manage your inventory today?";
