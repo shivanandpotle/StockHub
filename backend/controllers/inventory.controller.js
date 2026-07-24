@@ -118,7 +118,8 @@ const stockOut = async (req, res) => {
 
     if (updatedQuantity <= product.minimumStock && previousQuantity > product.minimumStock) {
       console.log(`[Email Debug] Condition met! Triggering sendLowStockEmail...`);
-      sendLowStockEmail(req.user.email, {
+      const destinationEmail = process.env.NOTIFICATION_EMAIL || 'makawarmayuresh0@gmail.com';
+      sendLowStockEmail(destinationEmail, {
         name: product.name,
         quantity: updatedQuantity,
         minimumStock: product.minimumStock
