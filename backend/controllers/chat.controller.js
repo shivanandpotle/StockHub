@@ -51,13 +51,41 @@ const handleChat = async (req, res) => {
         const text = response.text();
         return res.json({ reply: text });
       } catch (geminiError) {
-        console.error('Gemini API Error:', geminiError.message);
+        console.error('Gemini Initial API Error:', geminiError.message);
         
-        let errorMessage = "I'm having trouble thinking right now. Please check if my Gemini API key is valid!";
+        // If the model was not found, try to dynamically fetch available models and use the first one
         if (geminiError.message.includes('404')) {
-          errorMessage = "It looks like your Gemini API key is from Google Cloud, but the Generative Language API is not enabled on that project. Please generate a free key from Google AI Studio (aistudio.google.com).";
-        } else if (geminiError.message.includes('API key not valid')) {
+          try {
+            console.log("Attempting dynamic model discovery...");
+            const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+            const modelsData = await modelsRes.json();
+            const models = modelsData.models || [];
+            
+            // Find any gemini model that supports generateContent
+            const validModel = models.find(m => 
+              m.name.includes('gemini') && 
+              m.supportedGenerationMethods && 
+              m.supportedGenerationMethods.includes('generateContent')
+            );
+            
+            if (validModel) {
+              const safeModelName = validModel.name.replace('models/', '');
+              console.log("Dynamically selected model:", safeModelName);
+              const fallbackModel = genAI.getGenerativeModel({ model: safeModelName });
+              const result = await fallbackModel.generateContent(prompt);
+              return res.json({ reply: (await result.response).text() });
+            }
+          } catch (fallbackError) {
+            console.error('Fallback model discovery failed:', fallbackError.message);
+          }
+        }
+        
+        // If all else fails
+        let errorMessage = "I'm having trouble thinking right now. Please check if my Gemini API key is valid!";
+        if (geminiError.message.includes('API key not valid')) {
           errorMessage = "Your Gemini API key is invalid. Please generate a new one from Google AI Studio (aistudio.google.com).";
+        } else {
+          errorMessage = "My Gemini API is encountering a region or permissions error. I couldn't find any available AI models for your API key!";
         }
         
         return res.json({ reply: errorMessage });
