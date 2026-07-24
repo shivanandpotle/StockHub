@@ -76,7 +76,7 @@ const updateProduct = async (req, res) => {
     }
 
     product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).populate('categoryId', 'name');
 
