@@ -49,7 +49,7 @@ const handleChat = async (req, res) => {
             'Authorization': `Bearer ${process.env.GROK_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'grok-beta',
+            model: 'grok-2-latest',
             messages: [
               { role: 'system', content: inventoryContext },
               { role: 'user', content: message }
