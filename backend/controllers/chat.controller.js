@@ -42,29 +42,43 @@ const handleChat = async (req, res) => {
     // 2. Call Grok API (if configured)
     if (process.env.GROK_API_KEY) {
       try {
-        const response = await fetch('https://api.x.ai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.GROK_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'grok-2-latest',
-            messages: [
-              { role: 'system', content: inventoryContext },
-              { role: 'user', content: message }
-            ]
-          })
+        console.log("Fetching available Grok models...");
+        const modelsRes = await fetch('https://api.x.ai/v1/models', {
+          headers: { 'Authorization': `Bearer ${process.env.GROK_API_KEY}` }
         });
+        const modelsData = await modelsRes.json();
+        const models = modelsData.data || [];
         
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(`Grok API Error: ${response.status} - ${errText}`);
+        for (const m of models) {
+          try {
+            console.log(`Trying Grok model: ${m.id}`);
+            const response = await fetch('https://api.x.ai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.GROK_API_KEY}`
+              },
+              body: JSON.stringify({
+                model: m.id,
+                messages: [
+                  { role: 'system', content: inventoryContext },
+                  { role: 'user', content: message }
+                ]
+              })
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              const text = data.choices[0].message.content;
+              console.log(`Success with Grok model: ${m.id}`);
+              return res.json({ reply: text });
+            }
+          } catch (e) {
+            // Silently ignore and try next
+          }
         }
         
-        const data = await response.json();
-        const text = data.choices[0].message.content;
-        return res.json({ reply: text });
+        throw new Error("No available Grok models worked.");
       } catch (grokError) {
         console.error('Grok API Error:', grokError.message);
         return res.json({ reply: "I am the StockHub AI Assistant! (Note: Grok API encountered an error. Please check your API key)." });
