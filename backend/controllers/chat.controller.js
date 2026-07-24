@@ -45,11 +45,23 @@ const handleChat = async (req, res) => {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       
       const prompt = `${inventoryContext}\n\nUser Question: ${message}\n\nAI Response:`;
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      return res.json({ reply: text });
+      try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        return res.json({ reply: text });
+      } catch (geminiError) {
+        console.error('Gemini API Error:', geminiError.message);
+        
+        let errorMessage = "I'm having trouble thinking right now. Please check if my Gemini API key is valid!";
+        if (geminiError.message.includes('404')) {
+          errorMessage = "It looks like your Gemini API key is from Google Cloud, but the Generative Language API is not enabled on that project. Please generate a free key from Google AI Studio (aistudio.google.com).";
+        } else if (geminiError.message.includes('API key not valid')) {
+          errorMessage = "Your Gemini API key is invalid. Please generate a new one from Google AI Studio (aistudio.google.com).";
+        }
+        
+        return res.json({ reply: errorMessage });
+      }
     } else {
       // 3. Fallback Mock Response (if no API key is provided yet)
       console.warn("⚠️ No GEMINI_API_KEY found. Returning mock chatbot response.");
