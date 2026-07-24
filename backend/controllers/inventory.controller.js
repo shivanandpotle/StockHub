@@ -112,12 +112,19 @@ const stockOut = async (req, res) => {
     });
 
     // Check if stock just dropped to or below minimum threshold
+    console.log(`[Email Debug] stockOut check:`);
+    console.log(`[Email Debug] updatedQuantity (${updatedQuantity}) <= minimumStock (${product.minimumStock})? -> ${updatedQuantity <= product.minimumStock}`);
+    console.log(`[Email Debug] previousQuantity (${previousQuantity}) > minimumStock (${product.minimumStock})? -> ${previousQuantity > product.minimumStock}`);
+
     if (updatedQuantity <= product.minimumStock && previousQuantity > product.minimumStock) {
+      console.log(`[Email Debug] Condition met! Triggering sendLowStockEmail...`);
       sendLowStockEmail(req.user.email, {
         name: product.name,
         quantity: updatedQuantity,
         minimumStock: product.minimumStock
       }).catch(err => console.error('Failed to trigger email asynchronously', err));
+    } else {
+      console.log(`[Email Debug] Condition NOT met. Email skipped.`);
     }
 
     res.status(201).json({
