@@ -11,8 +11,9 @@
 .icon-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
 .icon-btn.delete:hover { color: var(--danger); }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-.modal-card { width: 100%; max-width: 500px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px 28px 4px 28px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.modal-form { display: flex; flex-direction: column; gap: 16px; padding-bottom: 24px; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
+.modal-card { width: 100%; max-width: 500px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 28px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.modal-header h3 { margin: 0; }
+.modal-form { display: flex; flex-direction: column; gap: 16px; padding: 24px 28px; overflow-y: auto; flex: 1; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
 .cancel-btn { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: var(--radius-sm); font-weight: 500; }
